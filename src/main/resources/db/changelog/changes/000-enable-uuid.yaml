@@ -1,0 +1,13 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 000-enable-uuid
+      author: samar
+
+      changes:
+        - sql:
+            sql: CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+      rollback:
+        - sql:
+            sql: DROP EXTENSION IF EXISTS pgcrypto;

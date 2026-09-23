@@ -1,15 +1,20 @@
 databaseChangeLog:
+
   - changeSet:
-      id: 002-create-brand
+      id: 001-create-categories
       author: samar
+
       changes:
+
         - createTable:
-            tableName: brand
+            tableName: categories
+
             columns:
+
               - column:
                   name: id
-                  type: BIGINT
-                  autoIncrement: true
+                  type: UUID
+                  defaultValueComputed: gen_random_uuid()
                   constraints:
                     primaryKey: true
                     nullable: false
@@ -26,17 +31,27 @@ databaseChangeLog:
                   type: TEXT
 
               - column:
-                  name: brand_image
-                  type: VARCHAR(500)
+                  name: enabled
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
 
               - column:
                   name: created_at
                   type: TIMESTAMP
+                  defaultValueDate: CURRENT_TIMESTAMP
                   constraints:
                     nullable: false
 
               - column:
                   name: updated_at
                   type: TIMESTAMP
+                  defaultValueDate: CURRENT_TIMESTAMP
                   constraints:
                     nullable: false
+
+      rollback:
+
+        - dropTable:
+            tableName: categories
