@@ -1,6 +1,5 @@
 package com.pm.productservice.dto.requestDto;
 
-import com.pm.productservice.dto.CheckoutableType;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -27,9 +26,6 @@ public record CheckoutableRequest(
         )
         BigDecimal price,
 
-        Boolean enabled,
-
-        @NotNull(message = "Type is required")
-        CheckoutableType type
+        Boolean enabled
 ) {
 }

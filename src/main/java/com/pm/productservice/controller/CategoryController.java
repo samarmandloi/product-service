@@ -7,6 +7,7 @@ import com.pm.productservice.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,38 +21,40 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping
-    public List<CategoryResponse> getAll() {
-        return categoryService.getAll();
+    public ResponseEntity<List<CategoryResponse>> getAll() {
+        return ResponseEntity.ok(categoryService.getAll());
     }
 
     @GetMapping("/{id}")
-    public CategoryResponse getById(
+    public ResponseEntity<CategoryResponse> getById(
             @PathVariable UUID id) {
 
-        return categoryService.getById(id);
+        return ResponseEntity.ok(categoryService.getById(id));
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public CategoryResponse create(
+    public ResponseEntity<CategoryResponse> create(
             @Valid @RequestBody CategoryRequest request) {
 
-        return categoryService.create(request);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(categoryService.create(request));
     }
 
     @PatchMapping("/{id}")
-    public CategoryResponse patch(
+    public ResponseEntity<CategoryResponse> patch(
             @PathVariable UUID id,
             @RequestBody CategoryPatchRequest request) {
 
-        return categoryService.patch(id, request);
+        return ResponseEntity.ok(categoryService.patch(id, request));
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(
+    public ResponseEntity<Void> delete(
             @PathVariable UUID id) {
 
         categoryService.delete(id);
+
+        return ResponseEntity.noContent().build();
     }
 }

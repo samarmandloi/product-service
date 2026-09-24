@@ -12,6 +12,9 @@ public record VariantRequest(
         @NotNull(message = "Checkoutable ID is required")
         UUID checkoutableId,
 
+        @NotBlank(message = "SKU is required")
+        String sku,
+
         @NotBlank(message = "Name is required")
         String name,
 

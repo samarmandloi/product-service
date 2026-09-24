@@ -24,6 +24,9 @@ public class Variant {
     @JoinColumn(name = "checkoutable_id", nullable = false)
     private Checkoutable checkoutable;
 
+    @Column(nullable = false, unique = true, length = 100)
+    private String sku;
+
     @Column(nullable = false)
     private String name;
 

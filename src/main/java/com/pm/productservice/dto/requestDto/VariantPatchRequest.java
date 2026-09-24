@@ -9,6 +9,8 @@ public record VariantPatchRequest(
 
         UUID checkoutableId,
 
+        String sku,
+
         String name,
 
         String imageUrl,
