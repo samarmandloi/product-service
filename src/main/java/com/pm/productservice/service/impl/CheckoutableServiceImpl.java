@@ -13,6 +13,7 @@ import com.pm.productservice.repository.CheckoutableRepository;
 import com.pm.productservice.service.CheckoutableService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.pm.productservice.exception.ResourceNotFoundException;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,38 +26,39 @@ public class CheckoutableServiceImpl implements CheckoutableService {
     private final BrandRepository brandRepository;
 
     @Override
-    public List<CheckoutableResponse> getAll() {
+    public List<CheckoutableResponse> getAll(CheckoutableType type) {
 
-        return checkoutableRepository.findAll()
+        Class<? extends Checkoutable> entityType = switch (type) {
+            case PRODUCT -> Product.class;
+            case SAMPLE -> Sample.class;
+        };
+
+        return checkoutableRepository.findAllByType(entityType)
                 .stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     @Override
-    public CheckoutableResponse getById(UUID id) {
+    public CheckoutableResponse getById(
+            UUID id,
+            CheckoutableType type) {
 
-        Checkoutable checkoutable = checkoutableRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Checkoutable not found: " + id
-                        )
-                );
+        Checkoutable checkoutable = findByIdAndType(id, type);
 
         return toResponse(checkoutable);
     }
 
     @Override
-    public CheckoutableResponse create(CheckoutableRequest request) {
+    public CheckoutableResponse create(
+            CheckoutableRequest request,
+            CheckoutableType type) {
 
         Brand brand = brandRepository.findById(request.brandId())
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Brand not found: " + request.brandId()
-                        )
-                );
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Brand not found: " + request.brandId()));
 
-        Checkoutable checkoutable = createCheckoutable(request.type());
+        Checkoutable checkoutable = createCheckoutable(type);
 
         checkoutable.setBrand(brand);
         checkoutable.setName(request.name());
@@ -77,25 +79,15 @@ public class CheckoutableServiceImpl implements CheckoutableService {
     @Override
     public CheckoutableResponse patch(
             UUID id,
-            CheckoutablePatchRequest request
-    ) {
+            CheckoutablePatchRequest request,
+            CheckoutableType type) {
 
-        Checkoutable checkoutable = checkoutableRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "Checkoutable not found: " + id
-                        )
-                );
+        Checkoutable checkoutable = findByIdAndType(id, type);
 
         if (request.brandId() != null) {
-
             Brand brand = brandRepository.findById(request.brandId())
-                    .orElseThrow(() ->
-                            new RuntimeException(
-                                    "Brand not found: "
-                                            + request.brandId()
-                            )
-                    );
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Brand not found: " + request.brandId()));
 
             checkoutable.setBrand(brand);
         }
@@ -127,18 +119,45 @@ public class CheckoutableServiceImpl implements CheckoutableService {
     }
 
     @Override
-    public void delete(UUID id) {
+    public void delete(
+            UUID id,
+            CheckoutableType type) {
 
-        if (!checkoutableRepository.existsById(id)) {
-            throw new RuntimeException(
+        Checkoutable checkoutable = findByIdAndType(id, type);
+
+        checkoutableRepository.delete(checkoutable);
+    }
+
+    private Checkoutable findByIdAndType(
+            UUID id,
+            CheckoutableType type) {
+
+        Checkoutable checkoutable =
+                checkoutableRepository.findById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Checkoutable not found: " + id));
+
+        if (!isType(checkoutable, type)) {
+            throw new ResourceNotFoundException(
                     "Checkoutable not found: " + id
             );
         }
 
-        checkoutableRepository.deleteById(id);
+        return checkoutable;
     }
 
-    private Checkoutable createCheckoutable(CheckoutableType type) {
+    private boolean isType(
+            Checkoutable checkoutable,
+            CheckoutableType type) {
+
+        return switch (type) {
+            case PRODUCT -> checkoutable instanceof Product;
+            case SAMPLE -> checkoutable instanceof Sample;
+        };
+    }
+
+    private Checkoutable createCheckoutable(
+            CheckoutableType type) {
 
         return switch (type) {
             case PRODUCT -> new Product();
@@ -146,21 +165,19 @@ public class CheckoutableServiceImpl implements CheckoutableService {
         };
     }
 
-    private CheckoutableResponse toResponse(Checkoutable checkoutable) {
+    private CheckoutableResponse toResponse(
+            Checkoutable checkoutable) {
 
         CheckoutableType type;
 
         if (checkoutable instanceof Product) {
             type = CheckoutableType.PRODUCT;
-
         } else if (checkoutable instanceof Sample) {
             type = CheckoutableType.SAMPLE;
-
         } else {
             throw new IllegalStateException(
                     "Unknown Checkoutable type: "
-                            + checkoutable.getClass().getName()
-            );
+                            + checkoutable.getClass().getName());
         }
 
         return new CheckoutableResponse(

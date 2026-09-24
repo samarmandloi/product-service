@@ -7,6 +7,7 @@ import java.util.UUID;
 public record VariantResponse(
         UUID id,
         UUID checkoutableId,
+        String sku,
         String name,
         String imageUrl,
         BigDecimal originalPrice,

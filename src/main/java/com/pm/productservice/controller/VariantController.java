@@ -7,6 +7,7 @@ import com.pm.productservice.service.VariantService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,38 +21,40 @@ public class VariantController {
     private final VariantService variantService;
 
     @GetMapping
-    public List<VariantResponse> getAll() {
-        return variantService.getAll();
+    public ResponseEntity<List<VariantResponse>> getAll() {
+        return ResponseEntity.ok(variantService.getAll());
     }
 
     @GetMapping("/{id}")
-    public VariantResponse getById(
+    public ResponseEntity<VariantResponse> getById(
             @PathVariable UUID id) {
 
-        return variantService.getById(id);
+        return ResponseEntity.ok(variantService.getById(id));
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public VariantResponse create(
+    public ResponseEntity<VariantResponse> create(
             @Valid @RequestBody VariantRequest request) {
 
-        return variantService.create(request);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(variantService.create(request));
     }
 
     @PatchMapping("/{id}")
-    public VariantResponse patch(
+    public ResponseEntity<VariantResponse> patch(
             @PathVariable UUID id,
             @RequestBody VariantPatchRequest request) {
 
-        return variantService.patch(id, request);
+        return ResponseEntity.ok(variantService.patch(id, request));
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(
+    public ResponseEntity<Void> delete(
             @PathVariable UUID id) {
 
         variantService.delete(id);
+
+        return ResponseEntity.noContent().build();
     }
 }

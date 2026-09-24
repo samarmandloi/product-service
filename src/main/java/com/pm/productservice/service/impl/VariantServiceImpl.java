@@ -60,6 +60,7 @@ public class VariantServiceImpl implements VariantService {
         Variant variant = new Variant();
 
         variant.setCheckoutable(checkoutable);
+        variant.setSku(request.sku());
         variant.setName(request.name());
         variant.setImageUrl(request.imageUrl());
         variant.setOriginalPrice(request.originalPrice());
@@ -93,6 +94,10 @@ public class VariantServiceImpl implements VariantService {
                                                     + request.checkoutableId()));
 
             variant.setCheckoutable(checkoutable);
+        }
+
+        if (request.sku() != null) {
+            variant.setSku(request.sku());
         }
 
         if (request.name() != null) {
@@ -150,6 +155,7 @@ public class VariantServiceImpl implements VariantService {
         return new VariantResponse(
                 variant.getId(),
                 variant.getCheckoutable().getId(),
+                variant.getSku(),
                 variant.getName(),
                 variant.getImageUrl(),
                 variant.getOriginalPrice(),

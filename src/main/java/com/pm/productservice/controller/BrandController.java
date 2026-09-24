@@ -7,6 +7,7 @@ import com.pm.productservice.service.BrandService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,38 +21,40 @@ public class BrandController {
     private final BrandService brandService;
 
     @GetMapping
-    public List<BrandResponse> getAll() {
-        return brandService.getAll();
+    public ResponseEntity<List<BrandResponse>> getAll() {
+        return ResponseEntity.ok(brandService.getAll());
     }
 
     @GetMapping("/{id}")
-    public BrandResponse getById(
+    public ResponseEntity<BrandResponse> getById(
             @PathVariable UUID id) {
 
-        return brandService.getById(id);
+        return ResponseEntity.ok(brandService.getById(id));
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public BrandResponse create(
+    public ResponseEntity<BrandResponse> create(
             @Valid @RequestBody BrandRequest request) {
 
-        return brandService.create(request);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(brandService.create(request));
     }
 
     @PatchMapping("/{id}")
-    public BrandResponse patch(
+    public ResponseEntity<BrandResponse> patch(
             @PathVariable UUID id,
             @RequestBody BrandPatchRequest request) {
 
-        return brandService.patch(id, request);
+        return ResponseEntity.ok(brandService.patch(id, request));
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(
+    public ResponseEntity<Void> delete(
             @PathVariable UUID id) {
 
         brandService.delete(id);
+
+        return ResponseEntity.noContent().build();
     }
 }
