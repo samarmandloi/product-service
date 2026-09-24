@@ -1,12 +1,16 @@
 databaseChangeLog:
-  - include:
-      file: db/changelog/changes/001-create-category.yaml
 
   - include:
-      file: db/changelog/changes/002-create-brand.yaml
+      file: db/changelog/changes/000-enable-uuid.yaml
 
   - include:
-      file: db/changelog/changes/003-create-checkoutable.yaml
+      file: db/changelog/changes/001-create-categories.yaml
 
   - include:
-      file: db/changelog/changes/004-create-variant.yaml
+      file: db/changelog/changes/002-create-brands.yaml
+
+  - include:
+      file: db/changelog/changes/003-create-checkoutables.yaml
+
+  - include:
+      file: db/changelog/changes/004-create-variants.yaml
