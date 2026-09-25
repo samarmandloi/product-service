@@ -10,25 +10,49 @@ import com.pm.productservice.repository.BrandRepository;
 import com.pm.productservice.repository.CategoryRepository;
 import com.pm.productservice.service.BrandService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import com.pm.productservice.specification.CommonSpecification;
+import com.pm.productservice.validation.SortValidation;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BrandServiceImpl implements BrandService {
 
     private final BrandRepository brandRepository;
     private final CategoryRepository categoryRepository;
 
     @Override
-    public List<BrandResponse> getAll() {
+    public Page<BrandResponse> getAll(
+            String search,
+            Boolean enabled,
+            Pageable pageable) {
+        log.info(
+                "Fetching brands: search='{}', enabled={}, page={}, size={}, sort={}",
+                search,
+                enabled,
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                pageable.getSort()
+        );
+        SortValidation.validate(pageable);
 
-        return brandRepository.findAll()
-                .stream()
-                .map(this::toResponse)
-                .toList();
+        Specification<Brand> specification =
+                CommonSpecification.<Brand>search(search)
+                        .and(CommonSpecification.enabled(enabled));
+
+        Page<Brand> brands =
+                brandRepository.findAll(
+                        specification,
+                        pageable
+                );
+
+        return brands.map(this::toResponse);
     }
 
     @Override
@@ -46,7 +70,6 @@ public class BrandServiceImpl implements BrandService {
 
     @Override
     public BrandResponse create(BrandRequest request) {
-
         Category category = categoryRepository.findById(request.categoryId())
                 .orElseThrow(() ->
                         new ResourceNotFoundException(
