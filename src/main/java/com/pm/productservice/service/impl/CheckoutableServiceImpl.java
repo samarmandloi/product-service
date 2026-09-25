@@ -35,7 +35,7 @@ public class CheckoutableServiceImpl implements CheckoutableService {
 
         return checkoutableRepository.findAllByType(entityType)
                 .stream()
-                .map(this::toResponse)
+                .map(checkoutable -> toResponse(checkoutable, type))
                 .toList();
     }
 
@@ -45,8 +45,7 @@ public class CheckoutableServiceImpl implements CheckoutableService {
             CheckoutableType type) {
 
         Checkoutable checkoutable = findByIdAndType(id, type);
-
-        return toResponse(checkoutable);
+        return toResponse(checkoutable, type);
     }
 
     @Override
@@ -73,7 +72,7 @@ public class CheckoutableServiceImpl implements CheckoutableService {
         Checkoutable savedCheckoutable =
                 checkoutableRepository.save(checkoutable);
 
-        return toResponse(savedCheckoutable);
+        return toResponse(savedCheckoutable, type);
     }
 
     @Override
@@ -115,7 +114,7 @@ public class CheckoutableServiceImpl implements CheckoutableService {
         Checkoutable updatedCheckoutable =
                 checkoutableRepository.save(checkoutable);
 
-        return toResponse(updatedCheckoutable);
+        return toResponse(updatedCheckoutable, type);
     }
 
     @Override
@@ -132,28 +131,14 @@ public class CheckoutableServiceImpl implements CheckoutableService {
             UUID id,
             CheckoutableType type) {
 
-        Checkoutable checkoutable =
-                checkoutableRepository.findById(id)
-                        .orElseThrow(() -> new ResourceNotFoundException(
-                                "Checkoutable not found: " + id));
-
-        if (!isType(checkoutable, type)) {
-            throw new ResourceNotFoundException(
-                    "Checkoutable not found: " + id
-            );
-        }
-
-        return checkoutable;
-    }
-
-    private boolean isType(
-            Checkoutable checkoutable,
-            CheckoutableType type) {
-
-        return switch (type) {
-            case PRODUCT -> checkoutable instanceof Product;
-            case SAMPLE -> checkoutable instanceof Sample;
+        Class<? extends Checkoutable> entityType = switch (type) {
+            case PRODUCT -> Product.class;
+            case SAMPLE -> Sample.class;
         };
+
+        return checkoutableRepository.findByIdAndType(id, entityType)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Checkoutable not found: " + id));
     }
 
     private Checkoutable createCheckoutable(
@@ -166,19 +151,8 @@ public class CheckoutableServiceImpl implements CheckoutableService {
     }
 
     private CheckoutableResponse toResponse(
-            Checkoutable checkoutable) {
-
-        CheckoutableType type;
-
-        if (checkoutable instanceof Product) {
-            type = CheckoutableType.PRODUCT;
-        } else if (checkoutable instanceof Sample) {
-            type = CheckoutableType.SAMPLE;
-        } else {
-            throw new IllegalStateException(
-                    "Unknown Checkoutable type: "
-                            + checkoutable.getClass().getName());
-        }
+            Checkoutable checkoutable,
+            CheckoutableType type) {
 
         return new CheckoutableResponse(
                 checkoutable.getId(),
