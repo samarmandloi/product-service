@@ -8,10 +8,14 @@ import com.pm.productservice.entity.Variant;
 import com.pm.productservice.repository.CheckoutableRepository;
 import com.pm.productservice.repository.VariantRepository;
 import com.pm.productservice.service.VariantService;
+import com.pm.productservice.specification.CommonSpecification;
+import com.pm.productservice.specification.VariantSpecification;
+import com.pm.productservice.validation.SortValidation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -22,12 +26,24 @@ public class VariantServiceImpl implements VariantService {
     private final CheckoutableRepository checkoutableRepository;
 
     @Override
-    public List<VariantResponse> getAll() {
+    public Page<VariantResponse> getAll(
+            String search,
+            Boolean enabled,
+            Pageable pageable) {
 
-        return variantRepository.findAll()
-                .stream()
-                .map(this::toResponse)
-                .toList();
+        SortValidation.validate(pageable);
+
+        Specification<Variant> specification =
+                VariantSpecification.search(search)
+                        .and(CommonSpecification.enabled(enabled));
+
+        Page<Variant> variants =
+                variantRepository.findAll(
+                        specification,
+                        pageable
+                );
+
+        return variants.map(this::toResponse);
     }
 
     @Override
