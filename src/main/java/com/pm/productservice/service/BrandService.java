@@ -3,13 +3,19 @@ package com.pm.productservice.service;
 import com.pm.productservice.dto.requestDto.BrandPatchRequest;
 import com.pm.productservice.dto.requestDto.BrandRequest;
 import com.pm.productservice.dto.responseDto.BrandResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface BrandService {
 
-    List<BrandResponse> getAll();
+    Page<BrandResponse> getAll(
+            String search,
+            Boolean enabled,
+            Pageable pageable
+    );
 
     BrandResponse getById(UUID id);
 

@@ -4,13 +4,17 @@ import com.pm.productservice.dto.requestDto.CategoryPatchRequest;
 import com.pm.productservice.dto.requestDto.CategoryRequest;
 import com.pm.productservice.dto.responseDto.CategoryResponse;
 import com.pm.productservice.entity.Category;
+import com.pm.productservice.exception.ResourceNotFoundException;
 import com.pm.productservice.repository.CategoryRepository;
 import com.pm.productservice.service.CategoryService;
+import com.pm.productservice.specification.CommonSpecification;
+import com.pm.productservice.validation.SortValidation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.time.ZoneOffset;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -20,19 +24,33 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
 
     @Override
-    public List<CategoryResponse> getAll() {
-        return categoryRepository.findAll()
-                .stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<CategoryResponse> getAll(
+            String search,
+            Boolean enabled,
+            Pageable pageable) {
+
+        SortValidation.validate(pageable);
+
+        Specification<Category> specification =
+                CommonSpecification.<Category>search(search)
+                        .and(CommonSpecification.enabled(enabled));
+
+        Page<Category> categories =
+                categoryRepository.findAll(
+                        specification,
+                        pageable
+                );
+
+        return categories.map(this::toResponse);
     }
 
     @Override
     public CategoryResponse getById(UUID id) {
 
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Category not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Category not found: " + id
+                ));
 
         return toResponse(category);
     }
@@ -49,7 +67,10 @@ public class CategoryServiceImpl implements CategoryService {
             category.setEnabled(request.enabled());
         }
 
-        return toResponse(categoryRepository.save(category));
+        Category savedCategory =
+                categoryRepository.save(category);
+
+        return toResponse(savedCategory);
     }
 
     @Override
@@ -58,8 +79,9 @@ public class CategoryServiceImpl implements CategoryService {
             CategoryPatchRequest request) {
 
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Category not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Category not found: " + id
+                ));
 
         if (request.name() != null) {
             category.setName(request.name());
@@ -73,17 +95,21 @@ public class CategoryServiceImpl implements CategoryService {
             category.setEnabled(request.enabled());
         }
 
-        return toResponse(categoryRepository.save(category));
+        Category updatedCategory =
+                categoryRepository.save(category);
+
+        return toResponse(updatedCategory);
     }
 
     @Override
     public void delete(UUID id) {
 
-        if (!categoryRepository.existsById(id)) {
-            throw new RuntimeException("Category not found: " + id);
-        }
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Category not found: " + id
+                ));
 
-        categoryRepository.deleteById(id);
+        categoryRepository.delete(category);
     }
 
     private CategoryResponse toResponse(Category category) {
@@ -93,8 +119,8 @@ public class CategoryServiceImpl implements CategoryService {
                 category.getName(),
                 category.getDescription(),
                 category.getEnabled(),
-                category.getCreatedAt().toInstant(ZoneOffset.UTC),
-                category.getUpdatedAt().toInstant(ZoneOffset.UTC)
+                category.getCreatedAt(),
+                category.getUpdatedAt()
         );
     }
 }
