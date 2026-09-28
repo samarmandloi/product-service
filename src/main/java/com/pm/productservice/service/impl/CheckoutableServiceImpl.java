@@ -4,6 +4,7 @@ import com.pm.productservice.dto.CheckoutableType;
 import com.pm.productservice.dto.requestDto.CheckoutablePatchRequest;
 import com.pm.productservice.dto.requestDto.CheckoutableRequest;
 import com.pm.productservice.dto.responseDto.CheckoutableResponse;
+import com.pm.productservice.dto.responseDto.PageResponse;
 import com.pm.productservice.entity.Brand;
 import com.pm.productservice.entity.Checkoutable;
 import com.pm.productservice.entity.Product;
@@ -29,7 +30,7 @@ public class CheckoutableServiceImpl implements CheckoutableService {
     private final BrandRepository brandRepository;
 
     @Override
-    public Page<CheckoutableResponse> getAll(
+    public PageResponse<CheckoutableResponse> getAll(
             CheckoutableType type,
             String search,
             Boolean enabled,
@@ -57,8 +58,14 @@ public class CheckoutableServiceImpl implements CheckoutableService {
                         pageable
                 );
 
-        return checkoutables.map(
-                checkoutable -> toResponse(checkoutable, type)
+        return new PageResponse<>(
+                checkoutables.getNumber(),
+                checkoutables.getSize(),
+                checkoutables.getTotalElements(),
+                checkoutables.getContent()
+                        .stream()
+                        .map(checkoutable -> toResponse(checkoutable, type))
+                        .toList()
         );
     }
 

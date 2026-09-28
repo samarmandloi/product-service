@@ -4,13 +4,13 @@ import com.pm.productservice.dto.CheckoutableType;
 import com.pm.productservice.dto.requestDto.CheckoutablePatchRequest;
 import com.pm.productservice.dto.requestDto.CheckoutableRequest;
 import com.pm.productservice.dto.responseDto.CheckoutableResponse;
-import org.springframework.data.domain.Page;
+import com.pm.productservice.dto.responseDto.PageResponse;
 import org.springframework.data.domain.Pageable;
 import java.util.UUID;
 
 public interface CheckoutableService {
 
-    Page<CheckoutableResponse> getAll(
+    PageResponse<CheckoutableResponse> getAll(
             CheckoutableType type,
             String search,
             Boolean enabled,
