@@ -187,7 +187,7 @@ public class VariantController {
             )
             @PathVariable UUID id,
 
-            @RequestBody VariantPatchRequest request) {
+            @Valid @RequestBody VariantPatchRequest request) {
 
         return ResponseEntity.ok(
                 variantService.patch(id, request)

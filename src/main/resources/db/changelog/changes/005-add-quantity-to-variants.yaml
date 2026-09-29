@@ -1,0 +1,17 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 005-add-quantity-to-variants
+      author: samar
+
+      changes:
+
+        - addColumn:
+            tableName: variants
+            columns:
+              - column:
+                  name: quantity
+                  type: INTEGER
+                  defaultValueNumeric: 0
+                  constraints:
+                    nullable: false
