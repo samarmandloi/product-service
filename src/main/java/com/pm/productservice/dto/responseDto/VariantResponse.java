@@ -12,6 +12,7 @@ public record VariantResponse(
         String imageUrl,
         BigDecimal originalPrice,
         BigDecimal discountedPrice,
+        Integer quantity,
         Boolean enabled,
         Instant createdAt,
         Instant updatedAt

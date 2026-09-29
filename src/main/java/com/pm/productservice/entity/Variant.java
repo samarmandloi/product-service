@@ -40,6 +40,9 @@ public class Variant {
     private BigDecimal discountedPrice;
 
     @Column(nullable = false)
+    private Integer quantity = 0;
+
+    @Column(nullable = false)
     private Boolean enabled = true;
 
     @CreationTimestamp
