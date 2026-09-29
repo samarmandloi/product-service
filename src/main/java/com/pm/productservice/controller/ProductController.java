@@ -4,16 +4,23 @@ import com.pm.productservice.dto.CheckoutableType;
 import com.pm.productservice.dto.requestDto.CheckoutablePatchRequest;
 import com.pm.productservice.dto.requestDto.CheckoutableRequest;
 import com.pm.productservice.dto.responseDto.CheckoutableResponse;
+import com.pm.productservice.dto.responseDto.PageResponse;
 import com.pm.productservice.service.CheckoutableService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
+@Validated
 @RestController
 @RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
@@ -22,10 +29,43 @@ public class ProductController {
     private final CheckoutableService checkoutableService;
 
     @GetMapping
-    public ResponseEntity<List<CheckoutableResponse>> getAll() {
+    public ResponseEntity<PageResponse<CheckoutableResponse>> getAll(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Boolean enabled,
+            @RequestParam(defaultValue = "0")
+            @Min(value = 0, message = "Page number cannot be negative")
+            int page,
+            @RequestParam(defaultValue = "10")
+            @Min(value = 1, message = "Page size must be at least 1")
+            @Max(value = 100, message = "Page size cannot exceed 100")
+            int size,
+            @RequestParam(required = false) String sort) {
+
+        Sort pageSort = Sort.unsorted();
+
+        if (sort != null && !sort.isBlank()) {
+            String[] sortParts = sort.split(",");
+
+            String field = sortParts[0];
+            Sort.Direction direction = sortParts.length > 1
+                    ? Sort.Direction.fromString(sortParts[1])
+                    : Sort.Direction.ASC;
+
+            pageSort = Sort.by(direction, field);
+        }
+
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                pageSort
+        );
+
         return ResponseEntity.ok(
                 checkoutableService.getAll(
-                        CheckoutableType.PRODUCT
+                        CheckoutableType.PRODUCT,
+                        search,
+                        enabled,
+                        pageable
                 )
         );
     }
