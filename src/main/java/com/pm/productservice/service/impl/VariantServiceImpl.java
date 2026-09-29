@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
 import java.util.UUID;
 
 @Service
@@ -81,6 +82,7 @@ public class VariantServiceImpl implements VariantService {
         variant.setImageUrl(request.imageUrl());
         variant.setOriginalPrice(request.originalPrice());
         variant.setDiscountedPrice(request.discountedPrice());
+        variant.setQuantity(request.quantity());
 
         if (request.enabled() != null) {
             variant.setEnabled(request.enabled());
@@ -132,6 +134,10 @@ public class VariantServiceImpl implements VariantService {
             variant.setDiscountedPrice(request.discountedPrice());
         }
 
+        if (request.quantity() != null) {
+            variant.setQuantity(request.quantity());
+        }
+
         if (request.enabled() != null) {
             variant.setEnabled(request.enabled());
         }
@@ -176,6 +182,7 @@ public class VariantServiceImpl implements VariantService {
                 variant.getImageUrl(),
                 variant.getOriginalPrice(),
                 variant.getDiscountedPrice(),
+                variant.getQuantity(),
                 variant.getEnabled(),
                 variant.getCreatedAt(),
                 variant.getUpdatedAt()

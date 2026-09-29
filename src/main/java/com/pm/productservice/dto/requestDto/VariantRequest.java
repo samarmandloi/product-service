@@ -3,7 +3,7 @@ package com.pm.productservice.dto.requestDto;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
+import jakarta.validation.constraints.Min;
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -27,6 +27,10 @@ public record VariantRequest(
         @NotNull(message = "Discounted price is required")
         @DecimalMin(value = "0.00", message = "Discounted price cannot be negative")
         BigDecimal discountedPrice,
+
+        @NotNull(message = "Quantity is required")
+        @Min(value = 0, message = "Quantity cannot be negative")
+        Integer quantity,
 
         Boolean enabled
 ) {
