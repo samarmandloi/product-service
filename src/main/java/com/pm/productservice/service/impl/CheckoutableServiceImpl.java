@@ -4,18 +4,22 @@ import com.pm.productservice.dto.CheckoutableType;
 import com.pm.productservice.dto.requestDto.CheckoutablePatchRequest;
 import com.pm.productservice.dto.requestDto.CheckoutableRequest;
 import com.pm.productservice.dto.responseDto.CheckoutableResponse;
+import com.pm.productservice.dto.responseDto.PageResponse;
 import com.pm.productservice.entity.Brand;
 import com.pm.productservice.entity.Checkoutable;
 import com.pm.productservice.entity.Product;
 import com.pm.productservice.entity.Sample;
+import com.pm.productservice.exception.ResourceNotFoundException;
 import com.pm.productservice.repository.BrandRepository;
 import com.pm.productservice.repository.CheckoutableRepository;
 import com.pm.productservice.service.CheckoutableService;
+import com.pm.productservice.validation.SortValidation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import com.pm.productservice.exception.ResourceNotFoundException;
-
-import java.util.List;
+import com.pm.productservice.specification.CommonSpecification;
 import java.util.UUID;
 
 @Service
@@ -26,17 +30,43 @@ public class CheckoutableServiceImpl implements CheckoutableService {
     private final BrandRepository brandRepository;
 
     @Override
-    public List<CheckoutableResponse> getAll(CheckoutableType type) {
+    public PageResponse<CheckoutableResponse> getAll(
+            CheckoutableType type,
+            String search,
+            Boolean enabled,
+            Pageable pageable) {
+
+        SortValidation.validate(pageable);
 
         Class<? extends Checkoutable> entityType = switch (type) {
             case PRODUCT -> Product.class;
             case SAMPLE -> Sample.class;
         };
 
-        return checkoutableRepository.findAllByType(entityType)
-                .stream()
-                .map(checkoutable -> toResponse(checkoutable, type))
-                .toList();
+        Specification<Checkoutable> specification =
+                CommonSpecification.<Checkoutable>search(search)
+                        .and(CommonSpecification.enabled(enabled))
+                        .and((root, query, criteriaBuilder) ->
+                                criteriaBuilder.equal(
+                                        root.type(),
+                                        entityType
+                                ));
+
+        Page<Checkoutable> checkoutables =
+                checkoutableRepository.findAll(
+                        specification,
+                        pageable
+                );
+
+        return new PageResponse<>(
+                checkoutables.getNumber(),
+                checkoutables.getSize(),
+                checkoutables.getTotalElements(),
+                checkoutables.getContent()
+                        .stream()
+                        .map(checkoutable -> toResponse(checkoutable, type))
+                        .toList()
+        );
     }
 
     @Override
@@ -45,6 +75,7 @@ public class CheckoutableServiceImpl implements CheckoutableService {
             CheckoutableType type) {
 
         Checkoutable checkoutable = findByIdAndType(id, type);
+
         return toResponse(checkoutable, type);
     }
 

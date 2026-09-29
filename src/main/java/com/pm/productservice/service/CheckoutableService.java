@@ -4,13 +4,18 @@ import com.pm.productservice.dto.CheckoutableType;
 import com.pm.productservice.dto.requestDto.CheckoutablePatchRequest;
 import com.pm.productservice.dto.requestDto.CheckoutableRequest;
 import com.pm.productservice.dto.responseDto.CheckoutableResponse;
-
-import java.util.List;
+import com.pm.productservice.dto.responseDto.PageResponse;
+import org.springframework.data.domain.Pageable;
 import java.util.UUID;
 
 public interface CheckoutableService {
 
-    List<CheckoutableResponse> getAll(CheckoutableType type);
+    PageResponse<CheckoutableResponse> getAll(
+            CheckoutableType type,
+            String search,
+            Boolean enabled,
+            Pageable pageable
+    );
 
     CheckoutableResponse getById(
             UUID id,
