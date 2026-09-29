@@ -1,0 +1,12 @@
+{
+  "id": "223a8c57-ac7f-43e6-a6a7-49f8ede477f9",
+  "brandId": "c35031c4-4f9e-412b-97fd-45e06a9f38ab",
+  "name": "Nike Air Max Updated",
+  "description": "Updated running shoes",
+  "imageUrl": "https://example.com/updated.png",
+  "price": 5499,
+  "enabled": true,
+  "type": "PRODUCT",
+  "createdAt": "2026-09-25T05:19:13.483184Z",
+  "updatedAt": "2026-09-28T11:00:00Z"
+}
