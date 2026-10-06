@@ -14,3 +14,6 @@ databaseChangeLog:
 
   - include:
       file: db/changelog/changes/004-create-variants.yaml
+
+  - include:
+      file: db/changelog/changes/005-add-quantity-to-variants.yaml

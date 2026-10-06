@@ -16,6 +16,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import com.pm.productservice.event.VariantEvent;
+import com.pm.productservice.publisher.VariantEventPublisher;
 import java.util.UUID;
 
 @Service
@@ -24,6 +26,7 @@ public class VariantServiceImpl implements VariantService {
 
     private final VariantRepository variantRepository;
     private final CheckoutableRepository checkoutableRepository;
+    private final VariantEventPublisher variantEventPublisher;
 
     @Override
     public Page<VariantResponse> getAll(
@@ -81,12 +84,24 @@ public class VariantServiceImpl implements VariantService {
         variant.setImageUrl(request.imageUrl());
         variant.setOriginalPrice(request.originalPrice());
         variant.setDiscountedPrice(request.discountedPrice());
+        variant.setQuantity(request.quantity());
 
         if (request.enabled() != null) {
             variant.setEnabled(request.enabled());
         }
 
-        return toResponse(variantRepository.save(variant));
+        Variant savedVariant = variantRepository.save(variant);
+
+        VariantEvent event = new VariantEvent(
+                "VARIANT_CREATED",
+                savedVariant.getId(),
+                savedVariant.getSku(),
+                savedVariant.getQuantity()
+        );
+
+        variantEventPublisher.publish(event);
+
+        return toResponse(savedVariant);
     }
 
     @Override
@@ -132,6 +147,10 @@ public class VariantServiceImpl implements VariantService {
             variant.setDiscountedPrice(request.discountedPrice());
         }
 
+        if (request.quantity() != null) {
+            variant.setQuantity(request.quantity());
+        }
+
         if (request.enabled() != null) {
             variant.setEnabled(request.enabled());
         }
@@ -141,18 +160,39 @@ public class VariantServiceImpl implements VariantService {
                 variant.getDiscountedPrice()
         );
 
-        return toResponse(variantRepository.save(variant));
+        Variant savedVariant =
+                variantRepository.save(variant);
+
+        VariantEvent event = new VariantEvent(
+                "VARIANT_UPDATED",
+                savedVariant.getId(),
+                savedVariant.getSku(),
+                savedVariant.getQuantity()
+        );
+
+        variantEventPublisher.publish(event);
+
+        return toResponse(savedVariant);
     }
 
     @Override
     public void delete(UUID id) {
 
-        if (!variantRepository.existsById(id)) {
-            throw new RuntimeException(
-                    "Variant not found: " + id);
-        }
+        Variant variant = variantRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Variant not found: " + id));
 
-        variantRepository.deleteById(id);
+        VariantEvent event = new VariantEvent(
+                "VARIANT_DELETED",
+                variant.getId(),
+                variant.getSku(),
+                variant.getQuantity()
+        );
+
+        variantRepository.delete(variant);
+
+        variantEventPublisher.publish(event);
     }
 
     private void validatePrices(
@@ -176,6 +216,7 @@ public class VariantServiceImpl implements VariantService {
                 variant.getImageUrl(),
                 variant.getOriginalPrice(),
                 variant.getDiscountedPrice(),
+                variant.getQuantity(),
                 variant.getEnabled(),
                 variant.getCreatedAt(),
                 variant.getUpdatedAt()
