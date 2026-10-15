@@ -12,7 +12,7 @@ services:
       DATABASE_URL: "jdbc:postgresql://host.docker.internal:5434/product_db"
       POSTGRES_USER: "${POSTGRES_USER}"
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
-      EUREKA_URL: "http://host.docker.internal:8761/eureka/"
+      EUREKA_URL: "http://eureka-server:8761/eureka/"
       RABBITMQ_HOST: "host.docker.internal"
       RABBITMQ_PORT: "5672"
       RABBITMQ_USERNAME: "guest"
