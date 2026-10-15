@@ -18,6 +18,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import com.pm.productservice.event.VariantEvent;
 import com.pm.productservice.publisher.VariantEventPublisher;
+import com.pm.productservice.event.VariantEventType;
 import java.util.UUID;
 
 @Service
@@ -93,7 +94,7 @@ public class VariantServiceImpl implements VariantService {
         Variant savedVariant = variantRepository.save(variant);
 
         VariantEvent event = new VariantEvent(
-                "VARIANT_CREATED",
+                VariantEventType.VARIANT_CREATED,
                 savedVariant.getId(),
                 savedVariant.getSku(),
                 savedVariant.getQuantity()
@@ -164,7 +165,7 @@ public class VariantServiceImpl implements VariantService {
                 variantRepository.save(variant);
 
         VariantEvent event = new VariantEvent(
-                "VARIANT_UPDATED",
+                VariantEventType.VARIANT_UPDATED,
                 savedVariant.getId(),
                 savedVariant.getSku(),
                 savedVariant.getQuantity()
@@ -184,7 +185,7 @@ public class VariantServiceImpl implements VariantService {
                                 "Variant not found: " + id));
 
         VariantEvent event = new VariantEvent(
-                "VARIANT_DELETED",
+                VariantEventType.VARIANT_DELETED,
                 variant.getId(),
                 variant.getSku(),
                 variant.getQuantity()
