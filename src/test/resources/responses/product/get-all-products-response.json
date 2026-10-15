@@ -1,0 +1,19 @@
+{
+  "pageNo": 0,
+  "pageSize": 10,
+  "totalElements": 1,
+  "content": [
+    {
+      "id": "223a8c57-ac7f-43e6-a6a7-49f8ede477f9",
+      "brandId": "c35031c4-4f9e-412b-97fd-45e06a9f38ab",
+      "name": "Nike Air Max",
+      "description": "Running shoes",
+      "imageUrl": "https://example.com/airmax.png",
+      "price": 4999,
+      "enabled": true,
+      "type": "PRODUCT",
+      "createdAt": "2026-09-25T05:19:13.483184Z",
+      "updatedAt": "2026-09-25T05:19:13.483251Z"
+    }
+  ]
+}
