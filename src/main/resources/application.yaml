@@ -5,7 +5,7 @@ spring:
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5434/product_db}
     username: ${POSTGRES_USER:samar}
-    password: ${POSTGRES_PASSWORD:}
+    password: ${POSTGRES_PASSWORD:samar}
 
   jpa:
     hibernate:
@@ -20,5 +20,23 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+app:
+  rabbitmq:
+    exchange: ${RABBITMQ_EXCHANGE:product.exchange}
+    queue: ${RABBITMQ_VARIANT_QUEUE:inventory.variant.queue}
+    routing-key: ${RABBITMQ_VARIANT_ROUTING_KEY:variant.event}
+
 bugsnag:
   api-key: ${BUGSNAG_API_KEY:}
+  release-stage: ${BUGSNAG_RELEASE_STAGE:development}
+
+logging:
+  level:
+    org.springframework.amqp: DEBUG
+    org.springframework.rabbit: DEBUG
